@@ -1,0 +1,5 @@
+FROM postgres:10.4-alpine
+MAINTAINER Nicholas Willhite (willnx84@gmail.com)
+
+RUN apk update && apk upgrade
+COPY setup-db.sh /docker-entrypoint-initdb.d/
