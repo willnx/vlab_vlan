@@ -11,17 +11,18 @@ services:
     image:
       willnx/vlab-vlan-db
     environment:
-      - VLAB_VLAN_ID_MIN=1000
-      - VLAB_VLAN_ID_MAX=2000
+      - VLAB_VLAN_ID_MIN=100
+      - VLAB_VLAN_ID_MAX=4000
       - POSTGRES_PASSWORD=testing
   vlab-vlan-celery:
     image:
       willnx/vlab-vlan-celery
     environment:
       - POSTGRES_PASSWORD=testing
-      - INF_VCENTER_SERVER=localhost
-      - INF_VCENTER_USER=SETME
-      - INF_VCENTER_PASSWORD=SETME
+      - INF_VCENTER_SERVER=virtlab.igs.corp
+      - INF_VCENTER_USER=Administrator@vsphere.local
+      - INF_VCENTER_PASSWORD=1.Password
+      - INF_VCENTER_TOP_LVL_DIR=/vlab
   vlab-vlan-rabbit:
     image:
       rabbitmq:3.7-alpine

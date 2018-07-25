@@ -30,12 +30,10 @@ class TestVMware(unittest.TestCase):
         expected = 1234
         self.assertEqual(spec.defaultPortConfig.vlan.vlanId, expected)
 
+    @patch.object(vmware, 'consume_task')
     @patch.object(vmware, 'vCenter')
-    def test_delete_network(self, fake_vCenter):
+    def test_delete_network(self, fake_vCenter, fake_consume_task):
         """vmware - ``delete_network`` returns None upon success"""
-        fake_network = MagicMock()
-        fake_vCenter.return_value.networks = {'someNetwork': fake_network}
-
         result = vmware.delete_network(name='someNetwork')
         expected = None
 
@@ -45,17 +43,16 @@ class TestVMware(unittest.TestCase):
     def test_delete_network_not_exists(self, fake_vCenter):
         """vmware - ``delete_network`` raises ValueError if the vLAN network does not exist"""
         fake_network = MagicMock()
-        fake_vCenter.return_value.networks = {'someNetwork': fake_network}
+        fake_vCenter.return_value.__enter__.return_value.networks = {'someNetwork': fake_network}
 
         with self.assertRaises(ValueError):
             vmware.delete_network(name='DerpNetwork')
 
+    @patch.object(vmware, 'consume_task')
     @patch.object(vmware, 'vCenter')
-    def test_delete_network_in_use(self, fake_vCenter):
+    def test_delete_network_in_use(self, fake_vCenter, fake_consume_task):
         """vmware - ``delete_network`` raises ValueError if the vLAN is still being used by VMs"""
-        fake_network = MagicMock()
-        fake_network.DestroyNetwork.side_effect = [vmware.vim.fault.ResourceInUse()]
-        fake_vCenter.return_value.networks = {'someNetwork': fake_network}
+        fake_consume_task.side_effect = [vmware.vim.fault.ResourceInUse()]
 
         with self.assertRaises(ValueError):
             vmware.delete_network(name='someNetwork')
@@ -68,7 +65,7 @@ class TestVMware(unittest.TestCase):
         fake_task.info.error = None
         fake_switch = MagicMock()
         fake_switch.AddDVPortgroup_Task.return_value = fake_task
-        fake_vCenter.return_value.dv_switches = {'someSwitch': fake_switch}
+        fake_vCenter.return_value.__enter__.return_value.dv_switches = {'someSwitch': fake_switch}
 
         result = vmware.create_network(name='myVlan', vlan_id=1234, switch_name='someSwitch')
         expected = ''
@@ -83,20 +80,17 @@ class TestVMware(unittest.TestCase):
         fake_task.info.error.msg = None
         fake_switch = MagicMock()
         fake_switch.AddDVPortgroup_Task.return_value = fake_task
-        fake_vCenter.return_value.dv_switches = {'otherSwitch': fake_switch}
+        fake_vCenter.return_value.__enter__.return_value.dv_switches = {'otherSwitch': fake_switch}
 
         with self.assertRaises(ValueError):
-             vmware.create_network(name='myVlan', vlan_id=1234, switch_name='someSwitch')
+            vmware.create_network(name='myVlan', vlan_id=1234, switch_name='someSwitch')
 
+    @patch.object(vmware, 'consume_task')
     @patch.object(vmware, 'vCenter')
     @patch.object(vmware, 'sleep')
-    def test_create_network_error(self, fake_sleep, fake_vCenter):
+    def test_create_network_error(self, fake_sleep, fake_vCenter, fake_consume_task):
         """vmware - ``create_network`` returns the error message upon failure"""
-        fake_task = MagicMock()
-        fake_task.info.error.msg = 'Some handy error message'
-        fake_switch = MagicMock()
-        fake_switch.AddDVPortgroup_Task.return_value = fake_task
-        fake_vCenter.return_value.dv_switches = {'someSwitch': fake_switch}
+        fake_consume_task.side_effect = [RuntimeError('Some handy error message')]
 
         result = vmware.create_network(name='myVlan', vlan_id=1234, switch_name='someSwitch')
         expected = 'Some handy error message'

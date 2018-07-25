@@ -1,13 +1,8 @@
-FROM alpine:3.7
-MAINTAINER Nicholas Willhite (willnx84@gmail.com)
+FROM willnx/vlab-base
 
-RUN apk update && apk upgrade
-RUN apk add python3 python3-dev openssl gcc postgresql-dev \
-            linux-headers libc-dev libffi-dev pcre pcre-dev
-RUN mkdir -p /etc/vlab/switches
 COPY dist/*.whl /tmp
 
-RUN pip3 install /tmp/*.whl && rm /tmp/*.whl
+RUN pip install /tmp/*.whl && rm /tmp/*.whl
 RUN apk del gcc
 WORKDIR /usr/lib/python3.6/site-packages/vlab_vlan
 CMD uwsgi --ini ./app.ini
