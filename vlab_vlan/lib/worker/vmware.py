@@ -4,9 +4,13 @@ This module abstracts the VMware API for creating/deleting Distributed Virtual P
 """
 from time import sleep
 
-from vlab_inf_common.vmware import vCenter, vim
+from celery.utils.log import get_task_logger
+from vlab_inf_common.vmware import vCenter, vim, consume_task
 
 from vlab_vlan.lib import const
+
+logger = get_task_logger(__name__)
+logger.setLevel(const.VLAB_VLAN_LOG_LEVEL.upper())
 
 
 def create_network(name, vlan_id, switch_name):
@@ -23,26 +27,22 @@ def create_network(name, vlan_id, switch_name):
     :param switch_name: The name of the switch to add the new vLAN network to
     :type switch_name: String
     """
-    vcenter = vCenter(host=const.INF_VCENTER_SERVER, user=const.INF_VCENTER_USER,
-                password=const.INF_VCENTER_PASSWORD)
-    try:
-        switch = vcenter.dv_switches[switch_name]
-    except KeyError:
-        available = list(vcenter.dv_switches.keys())
-        msg = 'No such switch: {}, Available: {}'.format(switch_name, available)
-        raise ValueError(msg)
-    spec = get_dv_portgroup_spec(name, vlan_id)
-    task = switch.AddDVPortgroup_Task([spec])
-
-    for _ in range(300):
-        if task.info.state in (vim.TaskInfo.State.queued, vim.TaskInfo.State.running):
-            sleep(1)
-        else:
-            break
-    if task.info.error:
-        return task.info.error.msg
-    else:
-        return ''
+    with vCenter(host=const.INF_VCENTER_SERVER, user=const.INF_VCENTER_USER,\
+                password=const.INF_VCENTER_PASSWORD) as vcenter:
+        try:
+            switch = vcenter.dv_switches[switch_name]
+        except KeyError:
+            available = list(vcenter.dv_switches.keys())
+            msg = 'No such switch: {}, Available: {}'.format(switch_name, available)
+            raise ValueError(msg)
+        spec = get_dv_portgroup_spec(name, vlan_id)
+        task = switch.AddDVPortgroup_Task([spec])
+        try:
+            consume_task(task, timeout=300)
+            error = ''
+        except RuntimeError as doh:
+            error = '{}'.format(doh)
+        return error
 
 
 def delete_network(name):
@@ -55,18 +55,19 @@ def delete_network(name):
     :param name: The name of the network to destroy
     :type name: String
     """
-    vcenter = vCenter(host=const.INF_VCENTER_SERVER, user=const.INF_VCENTER_USER,
-                password=const.INF_VCENTER_PASSWORD)
-    try:
-        network = vcenter.networks[name]
-    except KeyError:
-        msg = 'No such vLAN exists: {}'.format(name)
-        raise ValueError(msg)
-    try:
-        network.DestroyNetwork()
-    except vim.fault.ResourceInUse:
-        msg = "Unable to delete vLAN when Virtual Machines(es) are configured to use it"
-        raise ValueError(msg)
+    with vCenter(host=const.INF_VCENTER_SERVER, user=const.INF_VCENTER_USER, \
+                password=const.INF_VCENTER_PASSWORD) as vcenter:
+        try:
+            network = vcenter.networks[name]
+        except KeyError:
+            msg = 'No such vLAN exists: {}'.format(name)
+            raise ValueError(msg)
+        try:
+            task = network.Destroy_Task()
+            consume_task(task, timeout=300)
+        except vim.fault.ResourceInUse:
+            msg = "Unable to delete vLAN when Virtual Machines(es) are configured to use it"
+            raise ValueError(msg)
 
 
 def get_dv_portgroup_spec(name, vlan_id):

@@ -21,7 +21,7 @@ test: uninstall install
 images: build
 	sudo docker build -f ApiDockerfile -t willnx/vlab-vlan-api .
 	sudo docker build -f PgsqlDockerfile -t willnx/vlab-vlan-db .
-	sudo docker build -f CeleryDockerfile -t willnx/vlab-vlan-celery .
+	sudo docker build -f WorkerDockerfile -t willnx/vlab-vlan-worker .
 
 up:
-	docker-compose -p vlabVlan -f docker-compose.yml -f docker-compose.devmode.yml up
+	docker-compose -p vlabVlan -f docker-compose.yml -f docker-compose.devmode.yml up --abort-on-container-exit

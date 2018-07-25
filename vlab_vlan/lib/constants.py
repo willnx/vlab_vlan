@@ -10,8 +10,8 @@ DEFINED = OrderedDict([
             ('INF_VCENTER_USER', environ.get('INF_VCENTER_USER', 'tester')),
             ('INF_VCENTER_PASSWORD', environ.get('INF_VCENTER_PASSWORD', 'a')),
             ('VLAB_VLAN_LOG_LEVEL', environ.get('VLAB_VLAN_LOG_LEVEL', 'INFO')),
-            ('VLAB_MESSAGE_BROKER', environ.get('VLAB_MESSAGE_BROKER', 'vlab-vlan-rabbit')),
-            ('INF_DB_HOSTNAME', environ.get('INF_DB_HOSTNAME', 'vlab-vlan-db')),
+            ('VLAB_MESSAGE_BROKER', environ.get('VLAB_MESSAGE_BROKER', 'vlan-broker')),
+            ('INF_DB_HOSTNAME', environ.get('INF_DB_HOSTNAME', 'vlan-db')),
             ('POSTGRES_PASSWORD', environ.get('POSTGRES_PASSWORD', 'testing')),
           ])
 

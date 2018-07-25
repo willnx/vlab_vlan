@@ -26,7 +26,7 @@ Example:
 
 """
 from celery import Celery
-from vlab_api_common import get_logger
+from celery.utils.log import get_task_logger
 from vlab_inf_common.vmware import vCenter
 
 from vlab_vlan.lib.worker import database
@@ -34,7 +34,8 @@ from vlab_vlan.lib.worker.vmware import create_network, delete_network
 from vlab_vlan.lib import const
 
 app = Celery('vlan', backend='rpc://', broker=const.VLAB_MESSAGE_BROKER)
-logger = get_logger(__name__, loglevel=const.VLAB_VLAN_LOG_LEVEL)
+logger = get_task_logger(__name__)
+logger.setLevel(const.VLAB_VLAN_LOG_LEVEL.upper())
 
 
 @app.task(name='vlan.show')
@@ -47,7 +48,9 @@ def list(username):
     :type username: String
     """
     resp = {'content' : {}, 'error' : None, 'params' : {}}
+    logger.info('Task Starting')
     resp['content'] = database.get_vlan(username)
+    logger.info('Task Completed')
     return resp
 
 
@@ -63,9 +66,8 @@ def delete(username, vlan_name):
     :param vlan_name: The kind of vLAN to make, like FrontEnd or BackEnd
     :type vlan_name: String
     """
-    resp = {'error' : None, 'content': {},
-            'params': {'vlan_name': vlan_name}}
-
+    resp = {'error' : None, 'content': {}, 'params': {'vlan_name': vlan_name}}
+    logger.info('Task Starting')
     owns = database.get_vlan(username).get(vlan_name, None)
     if not owns:
         resp['error'] = "Unable to delete vLAN you do not own"
@@ -79,6 +81,7 @@ def delete(username, vlan_name):
         database.delete_vlan(username=username, vlan_name=vlan_name)
     except (RuntimeError, ValueError) as doh:
         resp['error'] = '{}'.format(doh)
+    logger.info('Task Completed')
     return resp
 
 
@@ -96,6 +99,7 @@ def create(username, vlan_name, switch_name):
     """
     resp = {'error' : None, 'content': {},
             'params': {'vlan_name': vlan_name, 'switch_name': switch_name}}
+    logger.info('Task Starting')
     try:
         vlan_tag_id = database.register_vlan(username=username, vlan_name=vlan_name)
     except ValueError as doh:
@@ -115,4 +119,5 @@ def create(username, vlan_name, switch_name):
             database.delete_vlan(username=username, vlan_name=vlan_name)
         except Exception as doh:
             logger.traceback(doh)
+    logger.info('Task Completed')
     return resp

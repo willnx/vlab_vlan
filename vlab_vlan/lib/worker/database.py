@@ -5,12 +5,12 @@ This module contains all the logic for interacting with the vLAN database
 import random
 
 import psycopg2
-from vlab_api_common import get_logger
+from celery.utils.log import get_task_logger
 
 from vlab_vlan.lib import const
 
-
-logger = get_logger(__name__, loglevel=const.VLAB_VLAN_LOG_LEVEL)
+logger = get_task_logger(__name__)
+logger.setLevel(const.VLAB_VLAN_LOG_LEVEL.upper())
 
 
 def get_db_connection():
