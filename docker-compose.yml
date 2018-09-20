@@ -1,28 +1,28 @@
 version: '3'
 services:
-  vlab-vlan-api:
+  vlan-api:
     image:
       willnx/vlab-vlan-api
     ports:
       - "5000:5000"
     sysctls:
       - net.core.somaxconn=500
-  vlab-vlan-db:
+  vlan-db:
     image:
       willnx/vlab-vlan-db
     environment:
       - VLAB_VLAN_ID_MIN=100
       - VLAB_VLAN_ID_MAX=4000
       - POSTGRES_PASSWORD=testing
-  vlab-vlan-celery:
+  vlan-worker:
     image:
-      willnx/vlab-vlan-celery
+      willnx/vlab-vlan-worker
     environment:
       - POSTGRES_PASSWORD=testing
       - INF_VCENTER_SERVER=localhost
       - INF_VCENTER_USER=changeMe
       - INF_VCENTER_PASSWORD=changeMe
       - INF_VCENTER_TOP_LVL_DIR=/vlab
-  vlab-vlan-rabbit:
+  vlan-broker:
     image:
       rabbitmq:3.7-alpine

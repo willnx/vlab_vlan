@@ -47,7 +47,7 @@ class VlanView(TaskView):
                       ]
                     }
 
-    @requires(verify=False)
+    @requires(verify=False, version=(1,2))
     @describe(post=POST_SCHEMA, delete=DELETE_SCHEMA, get_args={})
     def get(self, *args, **kwargs):
         """Obtain a info about the vlans a user owns"""
@@ -57,7 +57,7 @@ class VlanView(TaskView):
         resp['content'] = {'task-id': task.id}
         return ujson.dumps(resp), 200
 
-    @requires(verify=False) # XXX remove verify=False before commit
+    @requires(verify=False, version=(1,2)) # XXX remove verify=False before commit
     @validate_input(schema=POST_SCHEMA)
     def post(self, *args, **kwargs):
         """Create a new vlan"""
@@ -66,7 +66,7 @@ class VlanView(TaskView):
         switch_name = kwargs['body']['switch-name']
         return _dispatch_modify(username=username, the_task='vlan.create', vlan_name=vlan_name, switch_name=switch_name)
 
-    @requires(verify=False) # XXX remove verify=False before commit
+    @requires(verify=False, version=(1,2)) # XXX remove verify=False before commit
     @validate_input(schema=DELETE_SCHEMA)
     def delete(self, *args, **kwargs):
         """Delete a lvan"""
