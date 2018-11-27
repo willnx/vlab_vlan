@@ -45,12 +45,12 @@ class TestVlanView(unittest.TestCase):
         self.assertEqual(task_id, expected)
 
     def test_get_status_coded(self):
-        """VlanView - GET on /api/1/inf/vlan returns HTTP 200"""
+        """VlanView - GET on /api/1/inf/vlan returns HTTP 202"""
         resp = self.app.get('/api/1/inf/vlan',
                             headers={'X-Auth': self.token})
 
         status = resp.status_code
-        expected = 200
+        expected = 202
 
         self.assertEqual(status, expected)
 
@@ -66,13 +66,13 @@ class TestVlanView(unittest.TestCase):
         self.assertEqual(task_id, expected)
 
     def test_post_status_code(self):
-        """VlanView - POST on /api/1/inf/vlan returns HTTP 200"""
+        """VlanView - POST on /api/1/inf/vlan returns HTTP 202"""
         resp = self.app.post('/api/1/inf/vlan',
                              json={'switch-name': 'SomeSwitch', 'vlan-name': 'NewVLAN'},
                              headers={'X-Auth': self.token})
 
         status_code = resp.status_code
-        expected = 200
+        expected = 202
 
         self.assertEqual(status_code, expected)
 
@@ -112,13 +112,13 @@ class TestVlanView(unittest.TestCase):
         self.assertEqual(task_id, expected)
 
     def test_delete_status_code(self):
-        """VlanView - DELETE on /api/1/inf/vlan returns HTTP 200"""
+        """VlanView - DELETE on /api/1/inf/vlan returns HTTP 202"""
         resp = self.app.delete('/api/1/inf/vlan',
                              json={'vlan-name': 'NewVLAN'},
                              headers={'X-Auth': self.token})
 
         status_code = resp.status_code
-        expected = 200
+        expected = 202
 
         self.assertEqual(status_code, expected)
 

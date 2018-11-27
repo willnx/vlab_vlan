@@ -4,7 +4,7 @@ Defines the HTTP API for working with vLANs in vLab
 """
 import ujson
 from flask import current_app
-from flask_classy import request, route
+from flask_classy import request, route, Response
 from jsonschema import validate, ValidationError
 from vlab_inf_common.views import TaskView
 from vlab_api_common import describe, get_logger, requires, validate_input
@@ -52,10 +52,13 @@ class VlanView(TaskView):
     def get(self, *args, **kwargs):
         """Obtain a info about the vlans a user owns"""
         username = kwargs['token']['username']
-        resp = {'user' : username}
+        resp_data = {'user' : username}
         task = current_app.celery_app.send_task('vlan.show', [username])
-        resp['content'] = {'task-id': task.id}
-        return ujson.dumps(resp), 200
+        resp_data['content'] = {'task-id': task.id}
+        resp = Response(ujson.dumps(resp_data))
+        resp.status_code = 202
+        resp.headers.add('Link', '<{0}{1}/task/{2}>; rel=status'.format(const.VLAB_URL, self.route_base, task.id))
+        return resp
 
     @requires(verify=False, version=(1,2)) # XXX remove verify=False before commit
     @validate_input(schema=POST_SCHEMA)
@@ -64,7 +67,14 @@ class VlanView(TaskView):
         username = kwargs['token']['username']
         vlan_name = kwargs['body']['vlan-name']
         switch_name = kwargs['body']['switch-name']
-        return _dispatch_modify(username=username, the_task='vlan.create', vlan_name=vlan_name, switch_name=switch_name)
+        resp_data, task_id =  _dispatch_modify(username=username,
+                                               the_task='vlan.create',
+                                               vlan_name=vlan_name,
+                                               switch_name=switch_name)
+        resp = Response(ujson.dumps(resp_data))
+        resp.status_code = 202
+        resp.headers.add('Link', '<{0}{1}/task/{2}>; rel=status'.format(const.VLAB_URL, self.route_base, task_id))
+        return resp
 
     @requires(verify=False, version=(1,2)) # XXX remove verify=False before commit
     @validate_input(schema=DELETE_SCHEMA)
@@ -72,7 +82,13 @@ class VlanView(TaskView):
         """Delete a lvan"""
         username = kwargs['token']['username']
         vlan_name = kwargs['body']['vlan-name']
-        return _dispatch_modify(username=username, the_task='vlan.delete', vlan_name=vlan_name)
+        resp_data, task_id = _dispatch_modify(username=username,
+                                              the_task='vlan.delete',
+                                              vlan_name=vlan_name)
+        resp = Response(ujson.dumps(resp_data))
+        resp.status_code = 202
+        resp.headers.add('Link', '<{0}{1}/task/{2}>; rel=status'.format(const.VLAB_URL, self.route_base, task_id))
+        return resp
 
 
 def _dispatch_modify(username, the_task, **kwargs):
@@ -93,4 +109,4 @@ def _dispatch_modify(username, the_task, **kwargs):
     resp = {'user': username}
     task = current_app.celery_app.send_task(the_task, args=[username], kwargs=kwargs)
     resp['content'] = {'task-id': task.id}
-    return ujson.dumps(resp), 200
+    return resp, task.id
