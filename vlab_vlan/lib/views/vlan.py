@@ -16,7 +16,7 @@ logger = get_logger(__name__, loglevel=const.VLAB_VLAN_LOG_LEVEL)
 
 class VlanView(TaskView):
     """Defines the HTTP API for working with virtual local area networks"""
-    route_base = 'api/1/inf/vlan'
+    route_base = '/api/1/inf/vlan'
     POST_SCHEMA = { "$schema": "http://json-schema.org/draft-04/schema#",
                     "type": "object",
                     "properties": {
