@@ -34,7 +34,8 @@ class TestVlanView(unittest.TestCase):
         cls.fake_task.id = 'asdf-asdf-asdf'
         app.celery_app.send_task.return_value = cls.fake_task
 
-    def test_get_task_id(self):
+    @patch.object(flask_common, 'logger')
+    def test_get_task_id(self, fake_logger):
         """VlanView - GET on /api/1/inf/vlan returns a task-id"""
         resp = self.app.get('/api/1/inf/vlan',
                             headers={'X-Auth': self.token})
@@ -44,7 +45,8 @@ class TestVlanView(unittest.TestCase):
 
         self.assertEqual(task_id, expected)
 
-    def test_get_status_coded(self):
+    @patch.object(flask_common, 'logger')
+    def test_get_status_coded(self, fake_logger):
         """VlanView - GET on /api/1/inf/vlan returns HTTP 202"""
         resp = self.app.get('/api/1/inf/vlan',
                             headers={'X-Auth': self.token})
@@ -54,7 +56,19 @@ class TestVlanView(unittest.TestCase):
 
         self.assertEqual(status, expected)
 
-    def test_post_task_id(self):
+    @patch.object(flask_common, 'logger')
+    def test_get_link(self, fake_logger):
+        """VlanView - GET on /api/1/inf/vlan sets the Link header"""
+        resp = self.app.get('/api/1/inf/vlan',
+                            headers={'X-Auth': self.token})
+
+        link = resp.headers['Link']
+        expected = '<https://localhost/api/1/inf/vlan/task/asdf-asdf-asdf>; rel=status'
+
+        self.assertEqual(link, expected)
+
+    @patch.object(flask_common, 'logger')
+    def test_post_task_id(self, fake_logger):
         """VlanView - POST on /api/1/inf/vlan returns a task-id"""
         resp = self.app.post('/api/1/inf/vlan',
                              json={'switch-name': 'SomeSwitch', 'vlan-name': 'NewVLAN'},
@@ -65,7 +79,8 @@ class TestVlanView(unittest.TestCase):
 
         self.assertEqual(task_id, expected)
 
-    def test_post_status_code(self):
+    @patch.object(flask_common, 'logger')
+    def test_post_status_code(self, fake_logger):
         """VlanView - POST on /api/1/inf/vlan returns HTTP 202"""
         resp = self.app.post('/api/1/inf/vlan',
                              json={'switch-name': 'SomeSwitch', 'vlan-name': 'NewVLAN'},
@@ -100,7 +115,21 @@ class TestVlanView(unittest.TestCase):
 
         self.assertEqual(status_code, expected)
 
-    def test_delete_task_id(self):
+    @patch.object(flask_common, 'logger')
+    def test_post_link(self, fake_logger):
+        """VlanView - POST on /api/1/inf/vlan sets the Link header"""
+        resp = self.app.post('/api/1/inf/vlan',
+                             json={'switch-name': 'SomeSwitch', 'vlan-name': 'NewVLAN'},
+                             headers={'X-Auth': self.token})
+
+        status_code = resp.status_code
+        link = resp.headers['Link']
+        expected = '<https://localhost/api/1/inf/vlan/task/asdf-asdf-asdf>; rel=status'
+
+        self.assertEqual(link, expected)
+
+    @patch.object(flask_common, 'logger')
+    def test_delete_task_id(self, fake_logger):
         """VlanView - DELETE on /api/1/inf/vlan returns a task-id"""
         resp = self.app.delete('/api/1/inf/vlan',
                              json={'vlan-name': 'NewVLAN'},
@@ -111,7 +140,8 @@ class TestVlanView(unittest.TestCase):
 
         self.assertEqual(task_id, expected)
 
-    def test_delete_status_code(self):
+    @patch.object(flask_common, 'logger')
+    def test_delete_status_code(self, fake_logger):
         """VlanView - DELETE on /api/1/inf/vlan returns HTTP 202"""
         resp = self.app.delete('/api/1/inf/vlan',
                              json={'vlan-name': 'NewVLAN'},
@@ -133,6 +163,18 @@ class TestVlanView(unittest.TestCase):
         expected = 400
 
         self.assertEqual(status_code, expected)
+
+    @patch.object(flask_common, 'logger')
+    def test_delete_link(self, fake_logger):
+        """VlanView - DELETE on /api/1/inf/vlan sets the Link header"""
+        resp = self.app.delete('/api/1/inf/vlan',
+                             json={'vlan-name': 'NewVLAN'},
+                             headers={'X-Auth': self.token})
+
+        link = resp.headers['Link']
+        expected = '<https://localhost/api/1/inf/vlan/task/asdf-asdf-asdf>; rel=status'
+
+        self.assertEqual(link, expected)
 
 
 if __name__ == '__main__':
