@@ -13,6 +13,7 @@ DEFINED = OrderedDict([
             ('VLAB_MESSAGE_BROKER', environ.get('VLAB_MESSAGE_BROKER', 'vlan-broker')),
             ('INF_DB_HOSTNAME', environ.get('INF_DB_HOSTNAME', 'vlan-db')),
             ('POSTGRES_PASSWORD', environ.get('POSTGRES_PASSWORD', 'testing')),
+            ('VLAB_VERIFY_TOKEN', environ.get('VLAB_VERIFY_TOKEN', False)),
           ])
 
 Constants = namedtuple('Constants', list(DEFINED.keys()))

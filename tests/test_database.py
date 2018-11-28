@@ -110,8 +110,9 @@ class TestDatabase(unittest.TestCase):
     def test_register_vlan(self):
         """database - ``register_vlan`` returns the vlan tag id upon success"""
         self.fake_cur.fetchall.return_value = [(200,)]
+        fake_logger = MagicMock()
 
-        vlan_id = database.register_vlan(username='alice', vlan_name='wootVlan')
+        vlan_id = database.register_vlan(username='alice', vlan_name='wootVlan', logger=fake_logger)
         expected = 200
 
         self.assertEqual(vlan_id, expected)
@@ -124,8 +125,9 @@ class TestDatabase(unittest.TestCase):
                                              FakeIntegrityError23505(),
                                              MagicMock(),
                                             ]
+        fake_logger = MagicMock()
         with self.assertRaises(RuntimeError):
-            database.register_vlan(username='bob', vlan_name='someVlan')
+            database.register_vlan(username='bob', vlan_name='someVlan', logger=fake_logger)
 
     def test_register_vlan_dberror(self):
         """database - ``register_vlan`` raises any the IntegrityError if the pgcode is not 23505"""
@@ -135,8 +137,9 @@ class TestDatabase(unittest.TestCase):
                                              FakeIntegrityError23504(),
                                              MagicMock(),
                                             ]
+        fake_logger = MagicMock()
         with self.assertRaises(psycopg2.DatabaseError):
-            database.register_vlan(username='bob', vlan_name='someVlan')
+            database.register_vlan(username='bob', vlan_name='someVlan', logger=fake_logger)
 
     def test_register_vlan_valueerror(self):
         """database - ``register_vlan`` raises ValueError if a vlan with the same name already exists"""
@@ -146,8 +149,9 @@ class TestDatabase(unittest.TestCase):
                                              FakeIntegrityError23505(),
                                              MagicMock(),
                                             ]
+        fake_logger = MagicMock()
         with self.assertRaises(ValueError):
-            database.register_vlan(username='bob', vlan_name='someVlan')
+            database.register_vlan(username='bob', vlan_name='someVlan', logger=fake_logger)
 
 
 if __name__ == '__main__':

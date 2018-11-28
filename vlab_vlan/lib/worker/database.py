@@ -5,12 +5,8 @@ This module contains all the logic for interacting with the vLAN database
 import random
 
 import psycopg2
-from celery.utils.log import get_task_logger
 
 from vlab_vlan.lib import const
-
-logger = get_task_logger(__name__)
-logger.setLevel(const.VLAB_VLAN_LOG_LEVEL.upper())
 
 
 def get_db_connection():
@@ -24,7 +20,7 @@ def get_db_connection():
     return conn, cur
 
 
-def register_vlan(username, vlan_name):
+def register_vlan(username, vlan_name, logger):
     """Create a new record for tracking which vLAN owns which tag id.
 
     Every vLAN requires a unique vLAN tag in order to maintain network isolation.

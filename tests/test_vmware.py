@@ -58,8 +58,7 @@ class TestVMware(unittest.TestCase):
             vmware.delete_network(name='someNetwork')
 
     @patch.object(vmware, 'vCenter')
-    @patch.object(vmware, 'sleep')
-    def test_create_network(self, fake_sleep, fake_vCenter):
+    def test_create_network(self, fake_vCenter):
         """vmware - ``create_network`` returns an empty string when successful"""
         fake_task = MagicMock()
         fake_task.info.error = None
@@ -73,8 +72,7 @@ class TestVMware(unittest.TestCase):
         self.assertEqual(result, expected)
 
     @patch.object(vmware, 'vCenter')
-    @patch.object(vmware, 'sleep')
-    def test_create_network_valueerror(self, fake_sleep, fake_vCenter):
+    def test_create_network_valueerror(self, fake_vCenter):
         """vmware - ``create_network`` raises ValueError if the switch does not exist"""
         fake_task = MagicMock()
         fake_task.info.error.msg = None
@@ -87,8 +85,7 @@ class TestVMware(unittest.TestCase):
 
     @patch.object(vmware, 'consume_task')
     @patch.object(vmware, 'vCenter')
-    @patch.object(vmware, 'sleep')
-    def test_create_network_error(self, fake_sleep, fake_vCenter, fake_consume_task):
+    def test_create_network_error(self, fake_vCenter, fake_consume_task):
         """vmware - ``create_network`` returns the error message upon failure"""
         fake_consume_task.side_effect = [RuntimeError('Some handy error message')]
 

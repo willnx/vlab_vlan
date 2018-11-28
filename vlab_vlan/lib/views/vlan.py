@@ -47,44 +47,49 @@ class VlanView(TaskView):
                       ]
                     }
 
-    @requires(verify=False, version=(1,2))
+    @requires(verify=const.VLAB_VERIFY_TOKEN, version=(1,2))
     @describe(post=POST_SCHEMA, delete=DELETE_SCHEMA, get_args={})
     def get(self, *args, **kwargs):
         """Obtain a info about the vlans a user owns"""
         username = kwargs['token']['username']
         resp_data = {'user' : username}
-        task = current_app.celery_app.send_task('vlan.show', [username])
+        txn_id = request.headers.get('X-REQUEST-ID', 'noId')
+        task = current_app.celery_app.send_task('vlan.show', [username, txn_id])
         resp_data['content'] = {'task-id': task.id}
         resp = Response(ujson.dumps(resp_data))
         resp.status_code = 202
         resp.headers.add('Link', '<{0}{1}/task/{2}>; rel=status'.format(const.VLAB_URL, self.route_base, task.id))
         return resp
 
-    @requires(verify=False, version=(1,2)) # XXX remove verify=False before commit
+    @requires(verify=const.VLAB_VERIFY_TOKEN, version=(1,2)) # XXX remove verify=False before commit
     @validate_input(schema=POST_SCHEMA)
     def post(self, *args, **kwargs):
         """Create a new vlan"""
         username = kwargs['token']['username']
         vlan_name = kwargs['body']['vlan-name']
         switch_name = kwargs['body']['switch-name']
+        txn_id = request.headers.get('X-REQUEST-ID', 'noId')
         resp_data, task_id =  _dispatch_modify(username=username,
                                                the_task='vlan.create',
                                                vlan_name=vlan_name,
-                                               switch_name=switch_name)
+                                               switch_name=switch_name,
+                                               txn_id=txn_id)
         resp = Response(ujson.dumps(resp_data))
         resp.status_code = 202
         resp.headers.add('Link', '<{0}{1}/task/{2}>; rel=status'.format(const.VLAB_URL, self.route_base, task_id))
         return resp
 
-    @requires(verify=False, version=(1,2)) # XXX remove verify=False before commit
+    @requires(verify=const.VLAB_VERIFY_TOKEN, version=(1,2)) # XXX remove verify=False before commit
     @validate_input(schema=DELETE_SCHEMA)
     def delete(self, *args, **kwargs):
         """Delete a lvan"""
         username = kwargs['token']['username']
         vlan_name = kwargs['body']['vlan-name']
+        txn_id = request.headers.get('X-REQUEST-ID', 'noId')
         resp_data, task_id = _dispatch_modify(username=username,
                                               the_task='vlan.delete',
-                                              vlan_name=vlan_name)
+                                              vlan_name=vlan_name,
+                                              txn_id=txn_id)
         resp = Response(ujson.dumps(resp_data))
         resp.status_code = 202
         resp.headers.add('Link', '<{0}{1}/task/{2}>; rel=status'.format(const.VLAB_URL, self.route_base, task_id))

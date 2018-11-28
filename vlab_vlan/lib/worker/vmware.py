@@ -2,15 +2,9 @@
 """
 This module abstracts the VMware API for creating/deleting Distributed Virtual Portgroups.
 """
-from time import sleep
-
-from celery.utils.log import get_task_logger
 from vlab_inf_common.vmware import vCenter, vim, consume_task
 
 from vlab_vlan.lib import const
-
-logger = get_task_logger(__name__)
-logger.setLevel(const.VLAB_VLAN_LOG_LEVEL.upper())
 
 
 def create_network(name, vlan_id, switch_name):
