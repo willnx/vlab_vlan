@@ -47,7 +47,7 @@ class VlanView(TaskView):
                       ]
                     }
 
-    @requires(verify=const.VLAB_VERIFY_TOKEN, version=(1,2))
+    @requires(verify=False, version=2)
     @describe(post=POST_SCHEMA, delete=DELETE_SCHEMA, get_args={})
     def get(self, *args, **kwargs):
         """Obtain a info about the vlans a user owns"""
@@ -61,7 +61,7 @@ class VlanView(TaskView):
         resp.headers.add('Link', '<{0}{1}/task/{2}>; rel=status'.format(const.VLAB_URL, self.route_base, task.id))
         return resp
 
-    @requires(verify=const.VLAB_VERIFY_TOKEN, version=(1,2)) # XXX remove verify=False before commit
+    @requires(verify=const.VLAB_VERIFY_TOKEN, version=2)
     @validate_input(schema=POST_SCHEMA)
     def post(self, *args, **kwargs):
         """Create a new vlan"""
@@ -79,7 +79,7 @@ class VlanView(TaskView):
         resp.headers.add('Link', '<{0}{1}/task/{2}>; rel=status'.format(const.VLAB_URL, self.route_base, task_id))
         return resp
 
-    @requires(verify=const.VLAB_VERIFY_TOKEN, version=(1,2)) # XXX remove verify=False before commit
+    @requires(verify=const.VLAB_VERIFY_TOKEN, version=2)
     @validate_input(schema=DELETE_SCHEMA)
     def delete(self, *args, **kwargs):
         """Delete a lvan"""
