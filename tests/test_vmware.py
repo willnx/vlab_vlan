@@ -52,7 +52,7 @@ class TestVMware(unittest.TestCase):
     @patch.object(vmware, 'vCenter')
     def test_delete_network_in_use(self, fake_vCenter, fake_consume_task):
         """vmware - ``delete_network`` raises ValueError if the vLAN is still being used by VMs"""
-        fake_consume_task.side_effect = [vmware.vim.fault.ResourceInUse()]
+        fake_consume_task.side_effect = [RuntimeError()]
 
         with self.assertRaises(ValueError):
             vmware.delete_network(name='someNetwork')

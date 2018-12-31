@@ -59,8 +59,8 @@ def delete_network(name):
         try:
             task = network.Destroy_Task()
             consume_task(task, timeout=300)
-        except vim.fault.ResourceInUse:
-            msg = "Unable to delete vLAN when Virtual Machines(es) are configured to use it"
+        except RuntimeError:
+            msg = "Network {} in use. Must delete VMs using network before deleting network.".format(name)
             raise ValueError(msg)
 
 
