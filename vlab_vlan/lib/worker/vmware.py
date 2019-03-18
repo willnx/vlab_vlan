@@ -80,7 +80,7 @@ def get_dv_portgroup_spec(name, vlan_id):
     spec = vim.dvs.DistributedVirtualPortgroup.ConfigSpec()
     spec.name = name
 
-    spec.type = vim.dvs.DistributedVirtualPortgroup.PortgroupType.ephemeral
+    spec.type = vim.dvs.DistributedVirtualPortgroup.PortgroupType.earlyBinding
 
     spec.defaultPortConfig = vim.dvs.VmwareDistributedVirtualSwitch.VmwarePortConfigPolicy()
     spec.defaultPortConfig.vlan = vim.dvs.VmwareDistributedVirtualSwitch.VlanIdSpec()
@@ -91,5 +91,6 @@ def get_dv_portgroup_spec(name, vlan_id):
     spec.defaultPortConfig.securityPolicy.allowPromiscuous = vim.BoolPolicy(value=True)
     spec.defaultPortConfig.securityPolicy.macChanges = vim.BoolPolicy(value=False)
     spec.defaultPortConfig.securityPolicy.inherited = False
+    print(spec)
 
     return spec
