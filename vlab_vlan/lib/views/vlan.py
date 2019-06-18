@@ -95,6 +95,10 @@ class VlanView(TaskView):
         resp.headers.add('Link', '<{0}{1}/task/{2}>; rel=status'.format(const.VLAB_URL, self.route_base, task_id))
         return resp
 
+    def modify_network(self):
+        """Avoid exposing an useless API end point"""
+        pass
+
 
 def _dispatch_modify(username, the_task, **kwargs):
     """Send the task to Celery that makes or destroys a vlan
