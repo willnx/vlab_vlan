@@ -16,7 +16,7 @@ logger = get_logger(__name__, loglevel=const.VLAB_VLAN_LOG_LEVEL)
 
 class VlanView(TaskView):
     """Defines the HTTP API for working with virtual local area networks"""
-    route_base = '/api/1/inf/vlan'
+    route_base = '/api/2/inf/vlan'
     POST_SCHEMA = { "$schema": "http://json-schema.org/draft-04/schema#",
                     "type": "object",
                     "properties": {
@@ -66,7 +66,7 @@ class VlanView(TaskView):
     def post(self, *args, **kwargs):
         """Create a new vlan"""
         username = kwargs['token']['username']
-        vlan_name = kwargs['body']['vlan-name']
+        vlan_name = '{}_{}'.format(username, kwargs['body']['vlan-name'])
         switch_name = kwargs['body']['switch-name']
         txn_id = request.headers.get('X-REQUEST-ID', 'noId')
         resp_data, task_id =  _dispatch_modify(username=username,
@@ -84,7 +84,7 @@ class VlanView(TaskView):
     def delete(self, *args, **kwargs):
         """Delete a lvan"""
         username = kwargs['token']['username']
-        vlan_name = kwargs['body']['vlan-name']
+        vlan_name = '{}_{}'.format(username, kwargs['body']['vlan-name'])
         txn_id = request.headers.get('X-REQUEST-ID', 'noId')
         resp_data, task_id = _dispatch_modify(username=username,
                                               the_task='vlan.delete',
