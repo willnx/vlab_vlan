@@ -41,6 +41,15 @@ class TestDatabase(unittest.TestCase):
         """Runs after every test case"""
         cls.fake_psycopg2_connect.stop()
 
+    def test_get_vlan_strip_name(self):
+        """database - ``get_vlan`` strips the username off the vLAN name"""
+        self.fake_cur.fetchall.return_value = [('alice_smith_vlanA', 100)]
+
+        result = database.get_vlan(username='alice_smith')
+        expected = {'vlanA': 100}
+
+        self.assertEqual(result, expected)
+
     def test_get_db_connection(self):
         """database - ``get_db_connection`` returns the connection and cursor"""
         conn, cur = database.get_db_connection()
