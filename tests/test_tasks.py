@@ -22,6 +22,16 @@ class TestTasks(unittest.TestCase):
 
     @patch.object(tasks, 'get_task_logger')
     @patch.object(tasks, 'database')
+    def test_list_strips(self, fake_database, fake_get_task_logger):
+        """tasks - ``list`` strips off the username tag before returning the response"""
+        fake_database.get_vlan.return_value = {'bob_myVlan' : 1234}
+        result = tasks.list(username='bob', txn_id='myId')
+        expected =  {'content': {'myVlan': 1234}, 'params': {}, 'error': None}
+
+        self.assertEqual(result, expected)
+
+    @patch.object(tasks, 'get_task_logger')
+    @patch.object(tasks, 'database')
     @patch.object(tasks, 'delete_network')
     def test_delete(self, fake_delete_network, fake_database, fake_get_task_logger):
         """tasks - ``delete`` destroys the defined vLAN returns a dictionary"""
