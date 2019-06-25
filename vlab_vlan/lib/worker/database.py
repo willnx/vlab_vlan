@@ -125,12 +125,11 @@ def get_vlan(username):
     """
     # Order of vlan_name, tag matters
     get_sql = """SELECT vlan_name, tag FROM records WHERE person LIKE %s;"""
-    NAME_TAG = '{}_'.format(username) # Networks in VMware has the user's name added to them
     conn, cur = get_db_connection()
     try:
         cur.execute(get_sql, (username,))
         # x[0] should be the vlan name, x[1] should be the tag id
-        result = {x[0].replace(NAME_TAG, ''):x[1] for x in cur.fetchall()}
+        result = {x[0]:x[1] for x in cur.fetchall()}
     finally:
         conn.close()
     return result
