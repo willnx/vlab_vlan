@@ -51,7 +51,12 @@ def list(self, username, txn_id):
     logger = get_task_logger(txn_id=txn_id, task_id=self.request.id, loglevel=const.VLAB_VLAN_LOG_LEVEL.upper())
     resp = {'content' : {}, 'error' : None, 'params' : {}}
     logger.info('Task Starting')
-    resp['content'] = database.get_vlan(username)
+    USER_TAG = '{}_'.format(username)
+    vlans = database.get_vlan(username)
+    answer = {}
+    for name, tag in vlans.items():
+        answer[name.replace(USER_TAG, '')] = tag
+    resp['content'] = answer
     logger.info('Task Completed')
     return resp
 
