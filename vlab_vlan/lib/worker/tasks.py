@@ -119,7 +119,7 @@ def create(self, username, vlan_name, switch_name, txn_id):
 
     try:
         error = create_network(vlan_name, vlan_tag_id, switch_name)
-    except ValueError as doh:
+    except Exception as doh:
         resp['error'] = '{}'.format(doh)
     else:
         resp['error'] = error
