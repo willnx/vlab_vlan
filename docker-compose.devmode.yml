@@ -2,9 +2,9 @@ version: '3'
 services:
   vlan-api:
     volumes:
-      - ./vlab_vlan:/usr/lib/python3.6/site-packages/vlab_vlan
+      - ./vlab_vlan:/usr/lib/python3.8/site-packages/vlab_vlan
     command: ["python3", "app.py"]
   vlan-worker:
     volumes:
-      - ./vlab_vlan:/usr/lib/python3.6/site-packages/vlab_vlan
+      - ./vlab_vlan:/usr/lib/python3.8/site-packages/vlab_vlan
     command: ["celery", "-A", "tasks", "worker", "--loglevel", "debug"]
